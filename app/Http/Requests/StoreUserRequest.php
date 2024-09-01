@@ -32,9 +32,10 @@ class StoreUserRequest extends FormRequest
             'nom' => 'required|string|max:255',
             'prenom' => 'required|string|max:255',
             'login' => 'required|string|max:255|unique:users,login',
-            'role' => ['required', 'in:' . implode(',', array_column(RoleEnum::cases(), 'value'))],
-          //  'email' => 'required|email|unique:users,email',
-            'password' =>['confirmed', new CustumPasswordRule()],
+            'role' => ['required', 'exists:roles,name'],
+            'email' => 'required|email|unique:users,email',
+            'etat' => 'required|boolean',
+            'password' => ['confirmed', new CustumPasswordRule()],
         ];
     }
 
@@ -44,17 +45,20 @@ class StoreUserRequest extends FormRequest
             'nom.required' => 'Le nom est obligatoire.',
             'prenom.required' => 'Le prénom est obligatoire.',
             'role.required' => 'Le rôle est obligatoire.',
-            'role.in' => 'Le rôle doit être ADMIN ou BOUTIQUIER ou CLIENT',
+            'role.exists' => 'Ce role n\'existe pas.',
             'email.required' => "L'email est obligatoire.",
             'email.email' => "L'email doit être une adresse email valide.",
             'email.unique' => "Cet email est déjà utilisé.",
             'login.required' => 'Le login est obligatoire.',
             'login.unique' => "Cet login est déjà utilisé.",
+            'etat.required' => 'L\'état est obligatoire.',
+            'etat.boolean' => 'L\'état doit être une valeur booléenne.',
+            'password.confirmed' => 'Les mots de passe ne correspondent pas.',
         ];
     }
 
     function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException($this->sendResponse($validator->errors(),StateEnum::ECHEC,404));
+        throw new HttpResponseException($this->sendResponse($validator->errors(), StateEnum::ECHEC, 404));
     }
 }

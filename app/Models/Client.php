@@ -13,8 +13,9 @@ class Client extends Model
    // public mixed $user_id;
     protected $fillable = [
         'surname',
-        'adresse',
+        'adress',
         'telephone',
+        'photo',
         'user_id'
     ];
     protected $hidden = [

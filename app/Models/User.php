@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -21,9 +21,12 @@ class User extends Authenticatable
     protected $fillable = [
         'nom',
         'prenom',
+        'email',
         'login',
-        'role',
+        'role_id',
         'password',
+        'etat',
+        'role_id'
     ];
 
     /**
@@ -49,6 +52,10 @@ class User extends Authenticatable
 
     function client() {
         return $this->hasOne(Client::class,'user_id');
+    }
+
+    function role() {
+        return $this->belongsTo(Role::class);
     }
 
 }

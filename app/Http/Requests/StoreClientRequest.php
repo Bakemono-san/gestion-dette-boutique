@@ -14,7 +14,6 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreClientRequest extends FormRequest
 {
-    use RestResponseTrait;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -34,12 +33,13 @@ class StoreClientRequest extends FormRequest
             'surname' => ['required', 'string', 'max:255','unique:clients,surname'],
             'address' => ['string', 'max:255'],
             'telephone' => ['required',new TelephoneRule()],
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
 
             'user' => ['sometimes','array'],
             'user.nom' => ['required_with:user','string'],
             'user.prenom' => ['required_with:user','string'],
             'user.login' => ['required_with:user','string'],
-            'user.role' => ['required_with:user', 'in:' . implode(',', array_column(RoleEnum::cases(), 'value'))],
+            'user.role' => ['required_with:user','integer', 'exists:role,id'],
             'user.password' => ['required_with:user', new CustumPasswordRule(),'confirmed'],
 
         ];
@@ -62,11 +62,24 @@ class StoreClientRequest extends FormRequest
     {
         return [
             'surname.required' => "Le surnom est obligatoire.",
+            'surname.string' => "Le surnom doit être une chaîne de caractères.",
+            'surname.max' => "Le surnom ne doit pas dépasser 255 caractères.",
+            'surname.unique' => "Ce surnom est déjà utilisé.",
+            'address.string' => "L'adresse doit être une chaîne de caractères.",
+            'address.max' => "L'adresse ne doit pas dépasser 255 caractères.",
+            'telephone.required' => "Le téléphone est obligatoire.",
+            'telephone.telephone' => "Le téléphone doit être valide.",
+            'photo.required' => "La photo est obligatoire.",
+            'photo.image' => "La photo doit être une image.",
+            'photo.mimes' => "La photo doit être au format jpeg, png, jpg ou gif.",
+            'photo.max' => "La photo ne doit pas dépasser 2048 Ko.",
+            'user.role.exists' => "Le role doit exister.",
+            'user.role.required_with' => "Le role est obligatoire.",
         ];
     }
 
     function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException($this->sendResponse($validator->errors(),StateEnum::ECHEC,404));
+        throw new HttpResponseException(response()->json(['message' => $validator->errors()->first()], 422));
     }
 }
