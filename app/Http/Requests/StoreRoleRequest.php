@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\StateEnum;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreRoleRequest extends FormRequest
 {
@@ -11,7 +14,7 @@ class StoreRoleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,5 +27,20 @@ class StoreRoleRequest extends FormRequest
         return [
             'name' => 'required|string|max:255|unique:roles,name',
         ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Le nom du role est obligatoire',
+            'name.string' => 'Le nom du role doit être une chaine de caractères',
+            'name.max' => 'Le nom du role doit faire moins de 255 caractères',
+            'name.unique' => 'Le nom du role doit être unique',
+        ];
+    }
+
+    function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException($this->sendResponse(["erreur" => $validator->errors()],StateEnum::ECHEC,"erreur de validation",411));
     }
 }

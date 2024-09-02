@@ -19,9 +19,9 @@ class articlePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, $id): bool
+    public function view(User $user): bool
     {
-        return $user->role == \App\Enums\RoleEnum::BOUTIQUIER || $user->id == $id;
+        return $user->role == \App\Enums\RoleEnum::BOUTIQUIER;
     }
 
     /**
@@ -35,7 +35,7 @@ class articlePolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, $id): bool
+    public function update(User $user): bool
     {
         return $user->role == \App\Enums\RoleEnum::BOUTIQUIER;
     }
@@ -43,7 +43,7 @@ class articlePolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, $id): bool
+public function delete(User $user): bool
     {
         return $user->role == \App\Enums\RoleEnum::BOUTIQUIER;
     }

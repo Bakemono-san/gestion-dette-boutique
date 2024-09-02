@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\StateEnum;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateMassArticleRequest extends FormRequest
 {
@@ -35,5 +38,10 @@ class UpdateMassArticleRequest extends FormRequest
             'quantite.numeric' => 'La quantité doit etre un nombre',
             'quantite.min' => 'La quantité doit être supérieure ou égale à 1'
         ];
+    }
+
+    function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException($this->sendResponse(["erreur" => $validator->errors()],StateEnum::ECHEC,"erreur de validation",411));
     }
 }

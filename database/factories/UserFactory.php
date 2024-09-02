@@ -2,49 +2,37 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
+use App\Models\Client;
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
+    protected $model = User::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public function definition()
     {
         return [
-            'nom' => fake()->name(),
-            'prenom' => fake()->name(),
-            'login' => fake()->username(),
-            'role' => 'BOUTIQUIER',
-            'password' => static::$password ??= Hash::make('password'),
+            'prenom' => $this->faker->firstName,
+            'nom' => $this->faker->lastName,
+            'prenom' => $this->faker->firstName,
+            'login' => $this->faker->userName,
+            'role_id' => Role::factory(), // Create a new Role
+            'password' => $this->faker->password, // Make sure to use a hashed password if necessary
+            'etat' => $this->faker->randomElement(['true', 'false']),
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Define a method to create and associate a Client with the User.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
      */
-    public function admin(){
-        return $this->state(fn (array $attributes) => [
-            'role' => 'ADMIN',
-        ]);
-    }
-
-    public function client()
+    public function withClient()
     {
-        return $this->state(fn (array $attributes) => [
-            'role' => 'CLIENT',
-        ]);
+        return $this->afterCreating(function (User $user) {
+            Client::factory()->create(['user_id' => $user->id]); // Create a Client associated with this User
+        });
     }
 }

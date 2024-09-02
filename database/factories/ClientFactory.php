@@ -22,6 +22,8 @@ class ClientFactory extends Factory
             'adresse'=>$this->faker->address(),
             'telephone' => $this->faker->numerify('77#######'),
             'surname' => $this->faker->userName(),
+            'photo' => $this->faker->imageUrl(),
+            'user_id' => null, // Assign user_id to null to avoid eager loading with user relation.
 
         ];
     }
@@ -30,8 +32,9 @@ class ClientFactory extends Factory
     {
         return $this->afterMaking(function (Client $client) {
             if (!$client->user_id) {
-                $user = User::factory()->client()->create();
+                $user = User::factory()->create();
                 $client->user_id = $user->id;
+                $client->save();
             }
         });
     }

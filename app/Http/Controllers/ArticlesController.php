@@ -4,16 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Enums\StateEnum;
 use App\Http\Requests\StoreArticleRequest;
-use App\Http\Requests\StorearticlesRequest;
 use App\Http\Requests\UpdateArticleRequest;
-use App\Http\Requests\UpdatearticlesRequest;
 use App\Http\Requests\UpdateMassArticleRequest;
 use App\Http\Resources\ArticleCollection;
 use App\Models\Article;
-use App\Models\articles;
+use App\Models\Role;
+use App\Models\User;
 use App\Traits\RestResponseTrait;
 use Spatie\QueryBuilder\QueryBuilder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class ArticlesController extends Controller
@@ -23,9 +23,9 @@ class ArticlesController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request, User $user)
     {
-        //$this->authorize('viewAny', $request);
+        $this->authorize('viewAny', $user);
         $include = $request->has('include')?  [$request->input('include')] : [];
 
         $disponible = $request->has('disponible')?  $request->input('disponible') : true;
@@ -40,36 +40,37 @@ class ArticlesController extends Controller
             $quantite = -1;
             $sign = '>';
         }
-
-        // $data = Article::with($include)->whereNotNull('user_id')->get();
-        //return  response()->json(['data' => $data]);
-      //  return  ArticleResource::collection($data);
-       // return new ArticleCollection($data);
+        
         $Articles = QueryBuilder::for(Article::class)
             ->allowedFilters(['surname'])
             ->allowedIncludes(['user'])
             ->where('quantite', $sign, $quantite)
             ->get();
-        return new ArticleCollection($Articles);
+
+        $message = $Articles->count().' article(s) trouvé(s)';
+        $data = $Articles->count() > 0 ? new ArticleCollection($Articles) : [];
+        
+        return $this->sendResponse($data, StateEnum::SUCCESS, $message, 200);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreArticleRequest $request)
+    public function store(StoreArticleRequest $request,User $user)
     {
-        //$this->authorize('create', $request);
+        $this->authorize('create', $user);
 
         $data = $request->validated();
         $article = Article::create($data);
-        return $this->sendResponse($article, StateEnum::SUCCESS, 201);
+        return $this->sendResponse(new ArticleCollection($article), StateEnum::SUCCESS, 'article created successfully', 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show($id,User $user)
     {
+        $this->authorize('view',$user);
         $article = null;
         // dd(is_numeric($id));
         if(is_numeric($id) == 'number'){
@@ -80,10 +81,10 @@ class ArticlesController extends Controller
         }
 
         if (!$article) {
-            return $this->sendResponse([], StateEnum::ECHEC, 404);
+            return $this->sendResponse([], StateEnum::ECHEC, 'article non trouvé', 400);
         }
 
-        return $this->sendResponse($article, StateEnum::SUCCESS, 200);
+        return $this->sendResponse(new ArticleCollection($article), StateEnum::SUCCESS, 'ressource trouvée', 200);
 
 
     }
@@ -91,9 +92,9 @@ class ArticlesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateArticleRequest $request,$id)
+    public function update(UpdateArticleRequest $request,$id,User $user)
     {
-        //$this->authorize('update', $request);
+        $this->authorize('update', $user);
 
         if(empty($request->all())){
             return $this->sendResponse([], StateEnum::ECHEC, 'pas de donnee fournit',400);
@@ -111,7 +112,7 @@ class ArticlesController extends Controller
             $request["quantite"] = $article->quantite + $request->quantite;
         }
         $article->update($data);
-        return $this->sendResponse($article, StateEnum::SUCCESS, 200);
+        return $this->sendResponse(new ArticleCollection($article), StateEnum::SUCCESS, 'article updated successfully', 200);
     }
 
     public function massUpdate(Request $request){
@@ -122,6 +123,7 @@ class ArticlesController extends Controller
         }
 
         $errors = [];
+        $reussies = [];
 
         $articles = $request->input('articles');
 
@@ -139,6 +141,8 @@ class ArticlesController extends Controller
             if($validator->fails()){
                 array_push($errors, ['id' => $articleData['id'], 'message' => $validator->errors()->all()]);
                 continue;
+            }else{
+                array_push($reussies, ['id' => $articleData['id'], 'message' => 'article mis à jour avec succès']);
             }
 
             $validatedData = $validator->validated();
@@ -150,15 +154,15 @@ class ArticlesController extends Controller
             return $this->sendResponse([], StateEnum::SUCCESS, 'les mises à jour ont été effectuées avec succès');
         }
 
-        return $this->sendResponse($errors, StateEnum::ECHEC, 'Certains mis a jour on echoue', 400);
+        return $this->sendResponse(['errors'=>$errors,'reussies'=>$reussies], StateEnum::SUCCESS, 'Certains mis a jour on echoue', 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy($id, User $user)
     {
-        //$this->authorize('delete', $id);
+        $this->authorize('delete', $user);
         $article = Article::find($id);
 
         if (!$article) {

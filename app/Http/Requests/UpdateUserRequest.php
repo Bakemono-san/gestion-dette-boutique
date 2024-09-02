@@ -2,9 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\StateEnum;
 use App\Models\User;
-use App\Rules\PasswordRule;
+use App\Rules\CustumPasswordRule;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -32,7 +35,7 @@ class UpdateUserRequest extends FormRequest
             'prenom' => 'nullable|string',
             'email' => 'nullable|email|unique:users',
             'login' => 'nullable|string|unique:users',
-            'password' => ['nullable|', new PasswordRule()],
+            'password' => ['nullable|', new CustumPasswordRule()],
             'role' => 'nullable|in:admin|boutiquier',
         ];
     }
@@ -51,5 +54,10 @@ class UpdateUserRequest extends FormRequest
             'password' => 'Le mot de passe ne respecte pas les critères requis.',
             'role.in' => 'Le rôle doit être l\'un des suivants : admin, boutiquier.',
         ];
+    }
+
+    function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException($this->sendResponse(["erreur" => $validator->errors()],StateEnum::ECHEC,"erreur de validation",411));
     }
 }

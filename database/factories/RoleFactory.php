@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\dettes>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Model>
  */
-class DettesFactory extends Factory
+class RoleFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -16,8 +16,10 @@ class DettesFactory extends Factory
      */
     public function definition(): array
     {
+        $roles = ['ADMIN', 'BOUTIQUIER', 'CLIENT'];
+
         return [
-            //
+            'name' => $this->faker->randomElement($roles),
         ];
     }
 }
