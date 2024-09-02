@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ArticlesController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AuthController2;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\userController;
@@ -22,16 +23,16 @@ use Illuminate\Support\Facades\Route;
 
 // Route::middleware('auth:api')->post('/login', [AuthController::class, 'login']);
 
+Route::post('login', [AuthController2::class, 'login']);
+Route::apiResource('/users', userController::class)->only(['index', 'store','show']);
 
-Route::prefix('v1')->group(function () {
-    Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('auth:api')->prefix('v1')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     
     
     Route::post('/role', [RoleController::class, 'store']);
     
-    Route::apiResource('/users', userController::class)->only(['index', 'store','show']);
-
+    
     Route::apiResource('/clients', ClientController::class)->only(['index', 'store','show']);
     Route::get('/clients/{id}/user', [ClientController::class, 'get'])->name('articlesWithUser');
     Route::get('/clients/{id}/dettes', [ClientController::class, 'getDettes']);

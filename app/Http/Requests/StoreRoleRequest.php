@@ -3,12 +3,14 @@
 namespace App\Http\Requests;
 
 use App\Enums\StateEnum;
+use App\Traits\RestResponseTrait;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreRoleRequest extends FormRequest
 {
+    use RestResponseTrait;
     /**
      * Determine if the user is authorized to make this request.
      */

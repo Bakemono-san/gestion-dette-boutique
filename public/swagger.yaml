@@ -4,7 +4,12 @@ info:
   version: 1.0.0
   description: API documentation for the Boutique Management application
 
+servers:
+  - url: http://localhost:8000/api  
 
+security:
+  - BearerAuth: []
+  
 
 paths:
   /v1/login:
@@ -426,6 +431,11 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     ErrorResponse:
       type: object
@@ -548,19 +558,28 @@ components:
     StoreUserRequest:
       type: object
       properties:
-        name:
+        nom:
           type: string
-          example: John Doe
-        email:
+          example: Doe
+        prenom:
           type: string
-          format: email
-          example: user@example.com
+          example: John
         password:
           type: string
-          example: password123
-        role:
+          example: Pourquoipas34$
+        password_confirmation:
           type: string
-          example: Admin
+          example: Pourquoipas34$
+        role_id:
+          type: integer
+          example: 1
+        etat:
+          type: boolean
+          example: true
+        login:
+          type: string
+          example: bakemono
+        
 
     StoreClientRequest:
       type: object

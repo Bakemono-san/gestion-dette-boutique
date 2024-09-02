@@ -164,6 +164,7 @@ return [
          * Application Service Providers...
          */
         \Laravel\Passport\PassportServiceProvider::class,
+        App\Providers\CustomAuthServiceProvider::class,
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,

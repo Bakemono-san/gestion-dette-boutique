@@ -24,4 +24,34 @@ class Article extends Model
                     ->withPivot('quantite', 'prix_unitaire')
                     ->withTimestamps();
     }
+
+    public function scopeDisponible($query, $disponible)
+    {
+        if ($disponible === 'false') {
+            return $query->where('quantite', '=', 0);
+        }
+
+        if ($disponible === 'true') {
+            return $query->where('quantite', '>=', 1);
+        }
+
+        return $query->where('quantite', '>', -1);
+    }
+
+    public function scopeFilterBySurname($query, $surname)
+    {
+        if ($surname) {
+            return $query->where('surname', 'like', "%{$surname}%");
+        }
+
+        return $query;
+    }
+
+    public function scopeFilterByUsername($query,$username){
+        if($username){
+            return $query->whereHas('user', function($q) use($username){
+                $q->where('username', 'like', "%{$username}%");
+            });
+        }
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\ArticleServiceInt;
 use App\Enums\StateEnum;
 use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
@@ -20,35 +21,24 @@ class ArticlesController extends Controller
 {
     use RestResponseTrait;
 
+    private $articleService;
+    public function __construct(ArticleServiceInt $articleService) {
+        $this->articleService = $articleService;
+        $this->authorizeResource(Article::class, 'article');
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request, User $user)
+    public function index(Request $request)
     {
-        $this->authorize('viewAny', $user);
-        $include = $request->has('include')?  [$request->input('include')] : [];
-
-        $disponible = $request->has('disponible')?  $request->input('disponible') : true;
-
-        if($disponible && $request->input('disponible') == 'false'){
-            $quantite = 0;
-            $sign = '=';
-        }else if($disponible && $request->input('disponible') == 'true'){
-            $quantite = 1;
-            $sign = '>=';
-        }else{
-            $quantite = -1;
-            $sign = '>';
-        }
         
-        $Articles = QueryBuilder::for(Article::class)
-            ->allowedFilters(['surname'])
-            ->allowedIncludes(['user'])
-            ->where('quantite', $sign, $quantite)
-            ->get();
+        $filters = $request->only(['surname','username','disponible']);
+        
+        $articles = $this->articleService->getArticles($filters);
 
-        $message = $Articles->count().' article(s) trouvé(s)';
-        $data = $Articles->count() > 0 ? new ArticleCollection($Articles) : [];
+        $message = $articles->count().' article(s) trouvé(s)';
+        $data = $articles->count() > 0 ? new ArticleCollection($articles) : [];
         
         return $this->sendResponse($data, StateEnum::SUCCESS, $message, 200);
     }
@@ -61,7 +51,7 @@ class ArticlesController extends Controller
         $this->authorize('create', $user);
 
         $data = $request->validated();
-        $article = Article::create($data);
+        $article = $this->articleService->create($data);
         return $this->sendResponse(new ArticleCollection($article), StateEnum::SUCCESS, 'article created successfully', 201);
     }
 
@@ -75,9 +65,9 @@ class ArticlesController extends Controller
         // dd(is_numeric($id));
         if(is_numeric($id) == 'number'){
 
-            $article = Article::find($id);
+            $article = $this->articleService->find($id);
         }else{
-            $article = Article::where('libelle',$id)->first();
+            $article = $this->articleService->findByLibelle($id);
         }
 
         if (!$article) {
