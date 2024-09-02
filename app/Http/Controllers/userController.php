@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\userForClientRequest;
 use App\Http\Resources\UserCollection;
+use App\Http\Resources\UserResource;
 use App\Models\Client;
 use App\Models\User;
 use App\Traits\RestResponseTrait;
@@ -52,7 +53,7 @@ class userController extends Controller
             ->where($field, $sign, $value) // Specify the table name for the dynamic field
             ->get();
 
-        return $this->sendResponse(new UserCollection($request->all()), StateEnum::SUCCESS, 'Users fetched successfully', 200);
+        return $this->sendResponse(new UserCollection($users), StateEnum::SUCCESS, 'Users fetched successfully', 200);
     }
 
 
@@ -77,7 +78,7 @@ class userController extends Controller
             return $this->sendResponse([], StateEnum::ECHEC, "User not found", 404);
         }
 
-        return $this->sendResponse(new UserCollection($user), StateEnum::SUCCESS, 'User fetched successfully', 200);
+        return $this->sendResponse(new UserResource($user), StateEnum::SUCCESS, 'User fetched successfully', 200);
     }
 
     /**
