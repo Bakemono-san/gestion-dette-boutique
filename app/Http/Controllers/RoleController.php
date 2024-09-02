@@ -26,7 +26,7 @@ class RoleController extends Controller
      */
     public function store(StoreRoleRequest $request)
     {
-        $request->validate();
+        // $request->validate();
 
         // Create the role
         Role::create($request->all());

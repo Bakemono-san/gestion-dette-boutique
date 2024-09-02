@@ -16,4 +16,12 @@ class Article extends Model
     public function user(){
         return $this->belongsTo(User::class);
     }
+
+    public function dettes()
+    {
+        return $this->belongsToMany(Dette::class, 'dette_article')
+                    ->using(ArticleDette::class)
+                    ->withPivot('quantite', 'prix_unitaire')
+                    ->withTimestamps();
+    }
 }

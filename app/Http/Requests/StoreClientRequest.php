@@ -80,6 +80,6 @@ class StoreClientRequest extends FormRequest
 
     function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException(response()->json(['message' => $validator->errors()->first()], 422));
+        throw new HttpResponseException($this->sendResponse(["erreur" => $validator->errors()],StateEnum::ECHEC,"erreur de validation",411));
     }
 }

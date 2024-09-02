@@ -55,6 +55,6 @@ class UpdateArticleRequest extends FormRequest
 
     function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException($this->sendResponse($validator->errors(),StateEnum::ECHEC,404));
+        throw new HttpResponseException($this->sendResponse($validator->errors(),StateEnum::ECHEC,"erreur de validation",411));
     }
 }
